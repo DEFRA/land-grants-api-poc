@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import convict from 'convict'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,13 +9,6 @@ const isProduction = process.env.NODE_ENV === 'production'
 const isDev = process.env.NODE_ENV === 'development'
 const isTest = process.env.NODE_ENV === 'test'
 const config = convict({
-  serviceVersion: {
-    doc: 'The service version, this variable is injected into your docker container in CDP environments',
-    format: String,
-    nullable: true,
-    default: null,
-    env: 'SERVICE_VERSION'
-  },
   env: {
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
@@ -30,7 +24,7 @@ const config = convict({
   serviceName: {
     doc: 'Api Service Name',
     format: String,
-    default: 'land-grants-api-poc'
+    default: 'land-grants-api'
   },
   root: {
     doc: 'Project root',
@@ -70,25 +64,18 @@ const config = convict({
       format: ['ecs', 'pino-pretty'],
       default: isProduction ? 'ecs' : 'pino-pretty',
       env: 'LOG_FORMAT'
-    },
-    redact: {
-      doc: 'Log paths to redact',
-      format: Array,
-      default: isProduction
-        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : ['req', 'res', 'responseTime']
     }
   },
   mongoUri: {
     doc: 'URI for mongodb',
-    format: String,
+    format: '*',
     default: 'mongodb://127.0.0.1:27017/',
     env: 'MONGO_URI'
   },
   mongoDatabase: {
     doc: 'database for mongodb',
     format: String,
-    default: 'land-grants-api-poc',
+    default: 'land-grants-api',
     env: 'MONGO_DATABASE'
   },
   httpProxy: {
@@ -117,12 +104,57 @@ const config = convict({
     default: isProduction,
     env: 'ENABLE_METRICS'
   },
-  tracing: {
-    header: {
-      doc: 'Which header to track',
+  crm: {
+    baseUri: {
+      doc: 'The Base URI for the CRM tool',
       format: String,
-      default: 'x-cdp-request-id',
-      env: 'TRACING_HEADER'
+      default: 'http://changeme',
+      env: 'CRM_API_BASE_URI'
+    },
+    username: {
+      doc: 'The CRM tool API Username',
+      format: String,
+      default: 'changeme',
+      env: 'CRM_API_USERNAME'
+    },
+    password: {
+      doc: 'The CRM tool API Password',
+      format: String,
+      default: 'changeme',
+      env: 'CRM_API_PASSWORD'
+    }
+  },
+  arcGis: {
+    client_id: {
+      doc: 'The client ID for ArcGIS in order to establish a token',
+      format: String,
+      default: 'changeme',
+      env: 'ARCGIS_CLIENT_ID',
+      sensitive: true
+    },
+    client_secret: {
+      doc: 'The client secret for ArcGIS in order to establish a token',
+      format: String,
+      default: 'changeme',
+      env: 'ARCGIS_CLIENT_SECRET'
+    },
+    grant_type: {
+      doc: 'The ArcGIS permissions to be granted with the token',
+      format: String,
+      default: 'client_credentials',
+      env: 'ARCGIS_GRANT_TYPE'
+    },
+    username: {
+      doc: 'The ArcGIS account username to authenticate the old school way',
+      format: String,
+      default: 'changeme',
+      env: 'ARCGIS_USERNAME'
+    },
+    password: {
+      doc: 'The ArcGIS account password to authenticate the old school way',
+      format: String,
+      default: 'changeme',
+      env: 'ARCGIS_PASSWORD'
     }
   }
 })
